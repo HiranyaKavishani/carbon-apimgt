@@ -1212,6 +1212,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    for(int i = 0; i < visibleRoles.length; i++) {
+                        visibleRoles[i] = visibleRoles[i].trim();
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
@@ -1847,7 +1850,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!StringUtils.isBlank(api.getAuthorizationHeader())) {
             authorizationHeader = api.getAuthorizationHeader();
         } else {
-            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available 
+            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
             authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
@@ -2039,6 +2042,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String[] visibleRoles = new String[0];
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    for(int i = 0; i < visibleRoles.length; i++) {
+                        visibleRoles[i] = visibleRoles[i].trim();
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         filePath, registry);
@@ -2699,6 +2705,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
+                for(int i = 0; i < visibleRoles.length; i++) {
+                    visibleRoles[i] = visibleRoles[i].trim();
+                }
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
@@ -2849,7 +2858,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int apiId = apiMgtDAO.getAPIID(identifier, null);
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
             if (subsCount > 0) {
-                //Logging as a WARN since this isn't an error scenario. 
+                //Logging as a WARN since this isn't an error scenario.
                 String message = "Cannot remove the API as active subscriptions exist.";
                 log.warn(message);
                 throw new APIManagementException(message);
@@ -2895,7 +2904,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (registry.resourceExists(thumbPath)) {
                 registry.delete(thumbPath);
             }
-            
+
             /*Remove API Definition Resource - swagger*/
             String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
                     identifier.getApiName() + '-' + identifier.getVersion() + '-' + identifier.getProviderName();
@@ -2997,7 +3006,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /*
             WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-  
+
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                     WorkflowConstants.WF_TYPE_AM_API_STATE);
             if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
@@ -3648,7 +3657,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomInSequences() throws APIManagementException {
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3683,7 +3692,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
 
@@ -3694,7 +3703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomOutSequences() throws APIManagementException {
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3729,7 +3738,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
     /**
@@ -3740,7 +3749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Deprecated
     public List<String> getCustomFaultSequences() throws APIManagementException {
 
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         try {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
@@ -3774,7 +3783,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
     /**
@@ -3875,7 +3884,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
 
     public List<String> getCustomApiInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -3930,7 +3939,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
     /**
@@ -3941,7 +3950,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
 
     public List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -3996,7 +4005,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
     /**
@@ -4006,7 +4015,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
-        Set<String> sequenceList = new TreeSet<>();
+        List<String> sequenceList = new ArrayList<String>();
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = null;
@@ -4061,7 +4070,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return new ArrayList<>(sequenceList);
+        return sequenceList;
     }
 
     /**
@@ -4260,7 +4269,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 // only change the lifecycle if approved
-                // apiWFState is null when simple wf executor is used because wf state is not stored in the db. 
+                // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
                 if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                     targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
@@ -5526,6 +5535,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!registry.resourceExists(artifactPath)) {
             return;
         }
+
+        // Replace spaces
+        publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "");
 
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
