@@ -45,13 +45,32 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -88,15 +107,29 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class APIProviderHostObject extends ScriptableObject {
@@ -1967,6 +2000,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         NativeObject apiData = (NativeObject) args[0];
+        log.info("apiData: " + apiData );
         boolean success = false;
         String provider = (String) apiData.get("provider", apiData);
         String providerTenantMode = (String) apiData.get("provider", apiData);
@@ -1979,6 +2013,10 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean makeKeysForwardCompatible =
                                             Boolean.parseBoolean((String) apiData.get("makeKeysForwardCompatible",
                                                                                       apiData));
+        log.info("publishToGateway :" + publishToGateway);
+        log.info("makeKeysForwardCompatible :" + makeKeysForwardCompatible);
+        log.info("deprecateOldVersions :" + deprecateOldVersions);
+
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
@@ -1987,23 +2025,33 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+
             APIProvider apiProvider = getAPIProvider(thisObj);
+            log.info("apiProvider :" + apiProvider);
             APIIdentifier apiId = new APIIdentifier(provider, name, version);
             API api = apiProvider.getAPI(apiId);
+            log.info( "api :" + api);
             if (api != null) {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = getApiStatus(status);
                 String currentUser = ((APIProviderHostObject) thisObj).getUsername();
+                log.info("oldStatus:" + oldStatus);
+                log.info("newStatus:" + newStatus);
+                log.info("currentUser:" + currentUser);
+
                 apiProvider.changeAPIStatus(api, newStatus, currentUser, publishToGateway);
 
                 if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))  
                         && newStatus.equals(APIStatus.PUBLISHED)) {
                     if (makeKeysForwardCompatible) {
+                        log.info("Start to makeKeysForwardCompatible");
                         apiProvider.makeAPIKeysForwardCompatible(api);
                     }
 
                     if (deprecateOldVersions) {
+                        log.info("Deprecate old Versions :");
                         List<API> apiList = apiProvider.getAPIsByProvider(provider);
+                        log.info("apiList : "+ apiList);
                         APIVersionComparator versionComparator = new APIVersionComparator();
                         for (API oldAPI : apiList) {
                             if (oldAPI.getId().getApiName().equals(name) &&

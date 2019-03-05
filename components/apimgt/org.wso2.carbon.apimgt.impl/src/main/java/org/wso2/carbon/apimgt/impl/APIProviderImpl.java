@@ -42,9 +42,9 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -97,11 +97,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.InputStream;
 import java.rmi.RemoteException;
@@ -121,6 +116,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1356,12 +1355,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
+        log.info("****makeAPIKeysForwardCompatible function*****");
         String provider = api.getId().getProviderName();
         String apiName = api.getId().getApiName();
         Set<String> versions = getAPIVersions(provider, apiName);
+        log.info("********Version list: " + versions);
         APIVersionComparator comparator = new APIVersionComparator();
         for (String version : versions) {
             API otherApi = getAPI(new APIIdentifier(provider, apiName, version));
+            log.info("********otherApi: " + otherApi);
             if (comparator.compare(otherApi, api) < 0 && !otherApi.getStatus().equals(APIStatus.RETIRED)) {
                 apiMgtDAO.makeKeysForwardCompatible(provider, apiName, version,
                                                     api.getId().getVersion(), api.getContext());

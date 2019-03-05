@@ -6089,6 +6089,10 @@ public class ApiMgtDAO {
                                           String newVersion, String context)
             throws APIManagementException {
 
+        log.info("makeKeysForwardCompatible Function");
+        log.info("provider " + provider + " apiName" + apiName + " oldVersion" + oldVersion + " newVersion" +
+                newVersion + " context" + context );
+        log.info("*********");
         Connection connection = null;
         PreparedStatement prepStmt = null;
         PreparedStatement addSubKeySt = null;
@@ -6200,6 +6204,8 @@ public class ApiMgtDAO {
             getAppSt.setString(2, apiName);
             getAppSt.setString(3, oldVersion);
             rs = getAppSt.executeQuery();
+            log.info("********");
+            log.info(rs);
             while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS")))) {
                 int applicationId = rs.getInt("APPLICATION_ID");
                 if (!subscribedApplications.contains(applicationId)) {
