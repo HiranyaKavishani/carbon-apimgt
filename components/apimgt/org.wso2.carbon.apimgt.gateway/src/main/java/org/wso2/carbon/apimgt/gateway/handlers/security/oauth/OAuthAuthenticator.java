@@ -138,7 +138,7 @@ public class OAuthAuthenticator implements Authenticator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
+        String httpVerb = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
         if (Util.tracingEnabled()) {
@@ -190,7 +190,6 @@ public class OAuthAuthenticator implements Authenticator {
             TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
                                                          axis2MessageContext.getProperty
                                                                  (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
             if (transportHeaderMap != null) {
                 clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
             }
@@ -242,7 +241,14 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
-            String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            String matchingResource = "";
+            String graphQLOperationList = (String) synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE);
+            if (graphQLOperationList != null) {
+                httpVerb = synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_TYPE).toString();
+                matchingResource = graphQLOperationList;
+            } else {
+                matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            }
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
             }
@@ -258,7 +264,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             try {
                 info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
-                        matchingResource, httpMethod, defaultVersionInvoked);
+                        matchingResource, httpVerb, defaultVersionInvoked);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }
