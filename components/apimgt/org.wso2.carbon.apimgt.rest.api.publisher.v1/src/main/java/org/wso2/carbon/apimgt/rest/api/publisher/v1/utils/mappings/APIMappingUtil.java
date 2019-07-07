@@ -614,6 +614,9 @@ public class APIMappingUtil {
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+        List<APIOperationsDTO> apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+        dto.setOperations(apiOperationsDTO);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -913,15 +916,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList();
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
             URITemplate template = new URITemplate();
 
-            String uriTempVal = operation.getUritemplate();
+            String uriTempVal = operation.getTarget();
 
-            String httpVerb = operation.getHttpVerb();
+            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
@@ -940,7 +943,8 @@ public class APIMappingUtil {
 
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -964,13 +968,24 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-                handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                        + "' is invalid");
+
+                if(model.getType().equals(APIConstants.GRAPHQL_API)){
+                    handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
             }
 
             if (!isHttpVerbDefined) {
-                handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                        "HTTP methods");
+                if(model.getType().equals(APIConstants.GRAPHQL_API)) {
+                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
+                }
             }
         }
 
@@ -1307,8 +1322,8 @@ public class APIMappingUtil {
         } else {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-        operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+        operationsDTO.setVerb(uriTemplate.getHTTPVerb());
+        operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
             operationsDTO.setScopes(new ArrayList<String>() {{
                 add(uriTemplate.getScope().getName());
@@ -1323,13 +1338,21 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList() {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
+        String[] suportMethods = null;
+
+        if(apiType.equals(APIConstants.GRAPHQL_API)) {
+            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else {
+            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+        }
+
         for (String verb : RestApiConstants.SUPPORTED_METHODS) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setUritemplate("/*");
-            operationsDTO.setHttpVerb(verb);
+            operationsDTO.setTarget("/*");
+            operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
@@ -1353,7 +1376,7 @@ public class APIMappingUtil {
                     .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
             list.add(productDto);
         }
-        
+
         listDto.setList(list);
         listDto.setCount(list.size());
         return listDto;
@@ -1370,7 +1393,7 @@ public class APIMappingUtil {
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
-        
+
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
@@ -1407,7 +1430,7 @@ public class APIMappingUtil {
         }
         apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
         productDto.setApis(apis);
-        
+
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             productDto.setSubscriptionAvailability(
@@ -1464,7 +1487,7 @@ public class APIMappingUtil {
 
         return productDto;
     }
-    
+
     private static APIProductDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
             String subscriptionAvailability) {
 
@@ -1480,7 +1503,7 @@ public class APIMappingUtil {
         }
 
     }
-    
+
     private static APIProductDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -1493,7 +1516,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-    
+
     public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
@@ -1526,7 +1549,7 @@ public class APIMappingUtil {
         product.setState(state);
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
-        
+
         if (dto.getVisibility() != null) {
             product.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
         }
@@ -1556,7 +1579,7 @@ public class APIMappingUtil {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
         }
-        
+
         Map<String, String> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
             for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
@@ -1584,18 +1607,18 @@ public class APIMappingUtil {
             ProductAPIDTO res = dto.getApis().get(i);
             List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
             for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
- 
+
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
                 template.setUriTemplate(resourceItem.getUritemplate());
-                
+
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
                 resource.setUriTemplate(template);
                 productResources.add(resource);
             }
-            
+
         }
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
@@ -1618,7 +1641,7 @@ public class APIMappingUtil {
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         return product;
     }
-    
+
     private static String mapVisibilityFromDTOtoAPIProduct(APIProductDTO.VisibilityEnum visibility) {
         switch (visibility) {
             case PUBLIC:
@@ -1631,7 +1654,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-    
+
     private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
             APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
         switch (subscriptionAvailability) {

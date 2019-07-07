@@ -19,6 +19,18 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
+import graphql.language.FieldDefinition;
+import graphql.language.ObjectTypeDefinition;
+import graphql.language.TypeDefinition;
+import graphql.parser.Parser;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaGenerator;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
+import graphql.schema.idl.errors.SchemaProblem;
+import graphql.schema.validation.SchemaValidationError;
+import graphql.schema.validation.SchemaValidator;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,8 +57,12 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
@@ -150,6 +166,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 

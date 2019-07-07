@@ -1665,7 +1665,55 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#########################################################
+######################################################
+# The "Validate GRAPH_QL API Definition" utility API
+######################################################
+
+  '/apis/validate-graphql-schema':
+    post:
+      consumes:
+      - multipart/form-data
+      security:
+      - OAuth2Security:
+        - apim:api_create
+      summary: Validate GraphQL API definition and retrieve a summary
+      description: |
+        This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+      - in: formData
+        name: file
+        description: Definition to upload as a file
+        type: file
+        required: true
+      tags:
+      - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          schema:
+            $ref: '#/definitions/GraphQLValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  #########################################################
 # The "Configure Monetization" Processing Function resource API
 #########################################################
   /apis/{apiId}/monetize:
@@ -6072,11 +6120,12 @@ definitions:
         example: false
       type:
         type: string
-        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
         enum:
           - HTTP
           - WS
           - SOAPTOREST
+          - GRAPHQL
         example: HTTP
         default: HTTP
       transport:
@@ -6317,26 +6366,7 @@ definitions:
       operations:
        type: array
        items:
-        properties:
-          id:
-           type: string
-           example: "postapiresource"
-          uritemplate:
-            type: string
-            default: "/*"
-          httpVerb:
-            type: string
-            default: "GET"
-          authType:
-            type: string
-            default: "Any"
-          throttlingPolicy:
-            type: string
-            example: "Unlimited"
-          scopes:
-            type: array
-            items:
-              type: string
+         $ref: '#/definitions/APIOperations'
       threatProtectionPolicies:
         properties:
           list:
@@ -7332,6 +7362,26 @@ definitions:
             items:
               type: string
 
+  APIOperations :
+    title: Operation
+    properties:
+      id:
+        type: string
+        example: "postapiresource"
+      target:
+        type: string
+      verb:
+        type: string
+      authType:
+        type: string
+        default: "Any"
+      throttlingPolicy:
+        type: string
+        example: "Unlimited"
+      scopes:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Scope List resource
@@ -7643,7 +7693,34 @@ definitions:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
 
-#-----------------------------------------------------
+  GraphQLValidationResponse:
+    title: GraphQL API definition validation Response
+    required:
+    - isValid
+    - errorMessage
+    properties:
+      isValid:
+        description: |
+          This attribute declares whether this definition is valid or not.
+        type: boolean
+        example: true
+      errorMessage:
+        description: |
+          This attribute declares the validation error message
+        type: string
+        meesage: String
+      graphQLInfo:
+        description:
+          Summary of the GraphQL including the basic information
+        properties:
+          operations:
+            type: array
+            items:
+              $ref: '#/definitions/APIOperations'
+          graphQLSchema:
+            graphQLDefinition: String
+
+  #-----------------------------------------------------
 # The Threat Protection Policy List resource
 #-----------------------------------------------------
   ThreatProtectionPolicyList:

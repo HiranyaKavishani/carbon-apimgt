@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
@@ -84,5 +85,6 @@ public interface ApisApiService {
       public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, String ifMatch, MessageContext messageContext);
       public Response apisPost(APIDTO body, MessageContext messageContext);
       public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
+      public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
 }
