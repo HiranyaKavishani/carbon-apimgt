@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
@@ -48,6 +49,8 @@ public interface ApisApiService {
       public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext);
       public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdGraphqlSchemaPost(String apiId, GraphQLSchemaDTO body, MessageContext messageContext);
       public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext);
@@ -83,6 +86,7 @@ public interface ApisApiService {
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, String tenantDomain, MessageContext messageContext);
       public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext);
       public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, String ifMatch, MessageContext messageContext);
+      public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, String ifMatch, MessageContext messageContext);
       public Response apisPost(APIDTO body, MessageContext messageContext);
       public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
