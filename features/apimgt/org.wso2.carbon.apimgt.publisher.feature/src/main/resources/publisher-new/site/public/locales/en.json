@@ -445,6 +445,7 @@
   "thumbnail.validation.error": "Invalid file or API information is not set correctly.",
   "timeout": "Timeout",
   "try.dropping.some.files.here.or.click.to.select.files.to.upload": "Try dropping some files here, or click to selectfiles to upload.",
+  "try.dropping.schema.file.here.or.click.to.select.schema.to.upload": "Try dropping schema file here, or click to select schema to upload.",
   "type": "Type",
   "upload.btn": "UPLOAD",
   "uploaded.file": "Uploaded file",

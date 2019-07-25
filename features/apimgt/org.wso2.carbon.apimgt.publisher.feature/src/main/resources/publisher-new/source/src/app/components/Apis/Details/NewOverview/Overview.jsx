@@ -24,6 +24,7 @@ import Grid from '@material-ui/core/Grid';
 import CheckItem from './CheckItem';
 import ApiContext from '../components/ApiContext';
 import Resources from './Resources';
+import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
@@ -131,6 +132,10 @@ function Overview(props) {
                         <Grid container>
                             {isAPIProduct ? null : (<CheckItem itemSuccess itemLabel='Endpoints' />)}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
+                            {api.type === "GRAPHQL" ? (
+                             <CheckItem itemSuccess itemLabel='Operations' />
+                            ) : (<CheckItem itemSuccess itemLabel='Resources' />)}
+                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
                             <CheckItem itemSuccess itemLabel='Resources' />
                             {isAPIProduct ? null : (<CheckItem itemSuccess={false} itemLabel='Scopes' />)}
                             <CheckItem itemSuccess={false} itemLabel='Documents' />
@@ -142,6 +147,9 @@ function Overview(props) {
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
+                                {api.type === "GRAPHQL" ? (
+                             <Operations parentClasses={classes} api={api} />)
+                              : (<Resources parentClasses={classes} api={api} />)}
                                 {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
                                     (loadResources)}
                                 <AdditionalProperties parentClasses={classes} />

@@ -410,7 +410,6 @@ class ApiCreateSwagger extends React.Component {
                                         {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
                                     </ScopeValidation>
                                 </Grid>
-
                                 <Grid item>
                                     <Button raised onClick={() => this.props.history.push('/apis')}>
                                         <FormattedMessage id='cancel.btn' defaultMessage='Cancel' />
