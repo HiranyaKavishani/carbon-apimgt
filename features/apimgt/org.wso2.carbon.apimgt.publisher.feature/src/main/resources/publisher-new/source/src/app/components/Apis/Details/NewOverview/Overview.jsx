@@ -25,6 +25,7 @@ import API from 'AppData/api';
 import CheckItem from './CheckItem';
 import ApiContext from '../components/ApiContext';
 import Resources from './Resources';
+import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
@@ -146,6 +147,10 @@ function Overview(props) {
                         <Grid container>
                             {endpointsCheckItem}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
+                            {api.type === "GRAPHQL" ? (
+                             <CheckItem itemSuccess itemLabel='Operations' />
+                            ) : (<CheckItem itemSuccess itemLabel='Resources' />)}
+                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
                             <CheckItem itemSuccess itemLabel='Resources' />
                             {scopesCheckItem}
                             <CheckItem itemSuccess={false} itemLabel='Documents' />
@@ -158,6 +163,11 @@ function Overview(props) {
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
                                 {loadResources}
+                                {api.type === "GRAPHQL" ? (
+                             <Operations parentClasses={classes} api={api} />)
+                              : (<Resources parentClasses={classes} api={api} />)}
+                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
+                                    (loadResources)}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
