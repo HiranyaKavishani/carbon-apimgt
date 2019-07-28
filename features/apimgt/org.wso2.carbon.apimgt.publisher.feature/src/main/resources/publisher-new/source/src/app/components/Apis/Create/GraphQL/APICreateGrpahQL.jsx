@@ -143,10 +143,10 @@ class APICreateGraphQL extends React.Component {
             } else {
                 changes[name] = value;
             }
-           
-            
+
+
             // Checking validity.
-           
+
             const validUpdated = valid;
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
@@ -168,7 +168,7 @@ class APICreateGraphQL extends React.Component {
         const newApi = new API();
         const { graphQLBean, api } = this.state;
         const {
-            name, version, context, policies, endpointConfig, gatewayEnvironments, implementationType, operations
+            name, version, context, policies, endpointConfig, gatewayEnvironments, implementationType, operations,
         } = api;
         const uploadMethod = 'file';
         const apiAttributes = {
@@ -178,7 +178,7 @@ class APICreateGraphQL extends React.Component {
             endpointConfig,
             gatewayEnvironments,
             policies,
-            operations
+            operations,
         };
         const apiData = {
             additionalProperties: JSON.stringify(apiAttributes),
@@ -210,9 +210,8 @@ class APICreateGraphQL extends React.Component {
 
     handleNext = () => {
         const { activeStep, graphQLBean, valid } = this.state;
-        let uploadMethod;
-        uploadMethod = 'file';
-       
+        const { uploadMethod } = 'file';
+
         const validNew = JSON.parse(JSON.stringify(valid));
 
         // Handling next ( getting graphQL file info and validating)
@@ -229,9 +228,9 @@ class APICreateGraphQL extends React.Component {
                 if (graphQLBean.info.operations) {
                     this.setState(({ api }) => {
                         const changes = api;
-                        changes["operations"] = graphQLBean.info.operations;
-                        changes["gatewayEnvironments"] = ["Production and Sandbox"];
-                        return { api: changes }
+                        changes.operations = graphQLBean.info.operations;
+                        changes.gatewayEnvironments = ['Production and Sandbox'];
+                        return { api: changes };
                     });
                 }
             }
@@ -322,7 +321,7 @@ class APICreateGraphQL extends React.Component {
                                 {...provideGraphQLProps}
                             />
                         )}
-                         {activeStep === 1 && (
+                        {activeStep === 1 && (
                             <React.Fragment>
                                 <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
                             </React.Fragment>
@@ -333,22 +332,22 @@ class APICreateGraphQL extends React.Component {
                             <div>
                                 <Button
                                     disabled={activeStep === 0}
-                                        onClick={this.handleBack}
+                                    onClick={this.handleBack}
                                     className={classes.button}
                                 >
                                 Back
                                 </Button>
                                 <Button
                                     variant='contained'
-                                        color='primary'
-                                        onClick={this.handleNext}
-                                        className={classes.button}
-                                        disabled={
-                                            (valid.graphQLFile.invalidFile && uploadMethod === 'file')
-                                }
+                                    color='primary'
+                                    onClick={this.handleNext}
+                                    className={classes.button}
+                                    disabled={
+                                        (valid.graphQLFile.invalidFile && uploadMethod === 'file')
+                                    }
                                 >
                                     {activeStep === steps.length - 1 ? (
-                                            'Finish'
+                                        'Finish'
                                     ) : (
                                         <FormattedMessage id='next' defaultMessage='Next' />
                                     )}

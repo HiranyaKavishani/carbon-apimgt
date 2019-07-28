@@ -21,6 +21,7 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -31,14 +32,15 @@ import ApiContext from '../components/ApiContext';
 function RenderMethodBase(props) {
     const { theme, method } = props;
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
-    let chipTextColor = '#000000';
-    if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properly');
-        chipColor = '#cccccc';
-    } else {
-        chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
+    const chipTextColor = '#000000';
+    if (!chipColor && method === 'QUERY') {
+        chipColor = '#EF8B27';
+    } else if (!chipColor && method === 'MUTATION') {
+        chipColor = '#EFEF27';
+    } else if (!chipColor && method === 'SUBSCRIPTION') {
+        chipColor = '#27EFA3';
     }
-    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 15 }} />;
+    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
 }
 
 RenderMethodBase.propTypes = {
@@ -69,7 +71,10 @@ function Operations(props) {
                 <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Operations
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Operations.operation'
+                                defaultMessage='Operations'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/operations'}>
                             <Button variant='contained' color='default'>
@@ -77,18 +82,17 @@ function Operations(props) {
                             </Button>
                         </Link>
                     </div>
-
-                    {/* Operations */}
-                    <Typography component='p' variant='body1'>
-                        {api.operations &&
-                            api.operations.length !== 0 &&
-                            api.operations.map((item, index) => (
-                                <span>
-                                     {item.target}{'  '}
-                                     <RenderMethod method={item.verb} /><br/>
-                                </span>
+                    <div className={parentClasses.contentWrapper}>
+                        {api.operations
+                            && api.operations.length !== 0
+                            && api.operations.map(item => (
+                                <Typography className={parentClasses.heading} component='p' variant='body1'>
+                                    {item.target}
+                                    {'    '}
+                                    <RenderMethod method={item.verb} />
+                                </Typography>
                             ))}
-                    </Typography>
+                    </div>
                 </Paper>
             )}
         </ApiContext.Consumer>

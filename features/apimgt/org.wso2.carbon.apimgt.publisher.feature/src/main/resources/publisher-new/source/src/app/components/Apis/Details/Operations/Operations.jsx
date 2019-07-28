@@ -22,31 +22,24 @@ import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
-import TextField from '@material-ui/core/TextField';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import Checkbox from '@material-ui/core/Checkbox';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Divider from '@material-ui/core/Divider';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import AddCircle from '@material-ui/icons/AddCircle';
 import ScopesIcon from '@material-ui/icons/VpnKey';
+import Api from 'AppData/api';
+import { Progress } from 'AppComponents/Shared';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from 'AppComponents/Shared/Alert';
-
+import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from 'AppData/api';
 import Operation from './Operation';
-import { Progress } from 'AppComponents/Shared';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
-import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+
 
 const styles = theme => ({
     root: {
@@ -74,7 +67,7 @@ const styles = theme => ({
         alignItems: 'center',
     },
     button: {
-        marginLeft: theme.spacing.unit*2,
+        marginLeft: theme.spacing.unit * 2,
         textTransform: theme.custom.leftMenuTextStyle,
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
@@ -87,20 +80,20 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.paper),
         border: 'solid 1px ' + theme.palette.grey['300'],
         borderRadius: theme.shape.borderRadius,
-        marginTop: theme.spacing.unit*2,
+        marginTop: theme.spacing.unit * 2,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
     },
     addNewHeader: {
-        padding: theme.spacing.unit*2,
+        padding: theme.spacing.unit * 2,
         backgroundColor: theme.palette.grey['300'],
         fontSize: theme.typography.h6.fontSize,
         color: theme.typography.h6.color,
         fontWeight: theme.typography.h6.fontWeight,
     },
     addNewOther: {
-        padding: theme.spacing.unit*2,
+        padding: theme.spacing.unit * 2,
     },
     radioGroup: {
         display: 'flex',
@@ -126,56 +119,92 @@ class Operations extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            tmpMethods: [],
-            tmpResourceName: '',
-            paths: {},
             swagger: {},
             scopes: [],
-            pathDeleteList: [],
-            allChecked: false,
             notFound: false,
-            showAddResource: false,
             showScopes: false,
+            apiPolicies: [],
+            isAuthorize: false,
+            api: null,
+            operationList: this.props.api.operations,
         };
-        this.api = new Api();
-        this.api_uuid = props.api.id;
-        this.addResources = this.addResources.bind(this);
-        this.onChange = this.onChange.bind(this);
-        this.onChangeInput = this.onChangeInput.bind(this);
-        this.updatePath = this.updatePath.bind(this);
-        this.addRemoveToDeleteList = this.addRemoveToDeleteList.bind(this);
-        this.updateResources = this.updateResources.bind(this);
-        this.handleScopeChange = this.handleScopeChange.bind(this);
-        this.handleCheckAll = this.handleCheckAll.bind(this);
-        this.deleteSelected = this.deleteSelected.bind(this);
-        this.childResources = [];
-    }
-    handleChange = name => (event) => {
-        const tmpMethods = this.state.tmpMethods;
-        const index = tmpMethods.indexOf(name);
 
-        if (event.target.checked) {
-            // add to tmpMethods
-            if (index === -1) {
-                tmpMethods.push(name);
-            }
-        } else {
-            // remove from tmpMethods if exists
-            if (index > -1) {
-                tmpMethods.splice(index, 1);
-            }
-        }
-        this.setState({ tmpMethods });
-    };
-    onChange(checkedValues) {
-        this.setState({ tmpMethods: checkedValues });
+        this.newApi = new Api();
+        this.api = this.props.api;
+        this.handleUpdateList = this.handleUpdateList.bind(this);
+        this.toggleAssignScopes = this.toggleAssignScopes.bind(this);
+        this.handleScopeChange = this.handleScopeChange.bind(this);
+        this.updateOperations = this.updateOperations.bind(this);
+        this.handleScopeChangeInSwaggerRoot = this.handleScopeChangeInSwaggerRoot.bind(this);
     }
+    componentDidMount() {
+        const promisedApiObject = this.newApi.get(this.api.id);
+        promisedApiObject
+            .then((api) => {
+                this.setState({
+                    api,
+                    scopes: api.scopes,
+                });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
+                }
+            });
+
+        const promised_api = this.newApi.getSwagger(this.api.id);
+        promised_api
+            .then((response) => {
+                let tempScopes = [];
+                if (response.obj.security && response.obj.security.length !== 0) {
+                    response.obj.security.map((object, i) => {
+                        if (object.OAuth2Security) {
+                            tempScopes = object.OAuth2Security;
+                        }
+                    });
+                }
+                this.setState({ swagger: response.obj, scopes: tempScopes });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') console.log(error);
+                const status = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+            });
+        const promisedResPolicies = Api.policies('api');
+        promisedResPolicies
+            .then((policies) => {
+                this.setState({ apiPolicies: policies.obj.list });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const status = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
+                }
+            });
+    }
+
     handleScopeChange(e) {
         this.setState({ scopes: e.target.value });
         this.handleScopeChangeInSwaggerRoot(e.target.value);
     }
+
     handleScopeChangeInSwaggerRoot(scopes) {
-        const swagger = this.state.swagger;
+        const { swagger } = this.state.swagger;
         if (swagger.security) {
             swagger.security.map((object, i) => {
                 if (object.OAuth2Security) {
@@ -188,451 +217,146 @@ class Operations extends React.Component {
         this.setState({ swagger });
     }
 
-    componentDidMount() {
-        const api = new Api();
-        const promised_api_object = Api.get(this.api_uuid);
-        promised_api_object
-            .then((api) => {
-                this.setState({ api });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-        const promised_scopes_object = api.getScopes(this.api_uuid);
-        promised_scopes_object
-            .then((response) => {
-                this.setState({ apiScopes: response.obj });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-
-        const promised_api = this.api.getSwagger(this.api_uuid);
-        promised_api
-            .then((response) => {
-                let tempScopes = [];
-                if (response.obj.security && response.obj.security.length !== 0) {
-                    response.obj.security.map((object, i) => {
-                        if (object.OAuth2Security) {
-                            tempScopes = object.OAuth2Security;
-                        }
-                    });
-                }
-                this.setState({ swagger: response.obj, scopes: tempScopes });
-
-                if (response.obj.paths !== undefined) {
-                    this.setState({ paths: response.obj.paths });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                }
-            });
+    handleUpdateList(operation) {
+        const operationList = this.state.operationList;
+        const index = this.state.operationList.findIndex(opr => opr.target === operation.target);
+        operationList[index] = operation;
+        this.setState({ operationList });
+        console.log('*******');
+        console.log(this.state.operationList);
     }
-    onChangeInput = name => (event) => {
-        let value = event.target.value;
-        if (value.indexOf('/') === -1) {
-            value = '/' + value;
-        }
-        this.setState({ [name]: value });
-    };
-    addResources() {
-        const allMehtods = ['get', 'put', 'post', 'delete', 'patch', 'head'];
-        const defaultGet = {
-            description: '',
-            parameters: [],
-            'x-auth-type': 'Application & Application User',
-            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
-            responses: {
-                200: {
-                    description: '',
-                },
-            },
-        };
 
-        const defaultPost = {
-            description: '',
-            'x-auth-type': 'Application & Application User',
-            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
-            responses: {
-                200: {
-                    description: '',
-                },
-            },
-            parameters: [
-                {
-                    name: 'Payload',
-                    description: 'Request Body',
-                    required: false,
-                    in: 'body',
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            payload: {
-                                type: 'string',
-                            },
-                        },
-                    },
-                },
-            ],
-        };
-
-        const defaultDelete = {
-            description: '',
-            'x-auth-type': 'Application & Application User',
-            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
-            responses: {
-                200: {
-                    description: '',
-                },
-            },
-            parameters: [],
-        };
-        const defaultHead = {
-            'x-auth-type': 'Application & Application User',
-            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
-            responses: {
-                200: {
-                    description: '',
-                },
-            },
-            parameters: [],
-        };
-        const pathValue = {};
-        let existingPathVale = {};
-        const tmpPaths = this.state.paths;
-        if (Object.keys(tmpPaths).length > 0) {
-            if (this.state.tmpResourceName in tmpPaths) {
-                existingPathVale = tmpPaths[this.state.tmpResourceName];
-            }
-        }
-        allMehtods.map((method) => {
-            switch (method) {
-                case 'get':
-                    if ('get' in existingPathVale) {
-                        pathValue.get = existingPathVale.get;
-                    } else if (this.state.tmpMethods.indexOf('get') !== -1) {
-                        pathValue.get = defaultGet;
-                    }
-                    break;
-                case 'post':
-                    if ('post' in existingPathVale) {
-                        pathValue.post = existingPathVale.post;
-                    }
-                    if (this.state.tmpMethods.indexOf('post') !== -1) {
-                        pathValue.post = defaultPost;
-                    }
-                    break;
-                case 'put':
-                    if ('put' in existingPathVale) {
-                        pathValue.put = existingPathVale.put;
-                    }
-                    if (this.state.tmpMethods.indexOf('put') !== -1) {
-                        pathValue.put = defaultPost;
-                    }
-                    break;
-                case 'patch':
-                    if ('patch' in existingPathVale) {
-                        pathValue.patch = existingPathVale.patch;
-                    }
-                    if (this.state.tmpMethods.indexOf('patch') !== -1) {
-                        pathValue.patch = defaultPost;
-                    }
-                    break;
-                case 'delete':
-                    if ('delete' in existingPathVale) {
-                        pathValue.delete = existingPathVale.delete;
-                    }
-                    if (this.state.tmpMethods.indexOf('delete') !== -1) {
-                        pathValue.delete = defaultDelete;
-                    }
-                    break;
-                case 'head':
-                    if ('head' in existingPathVale) {
-                        pathValue.head = existingPathVale.head;
-                    }
-                    if (this.state.tmpMethods.indexOf('head') !== -1) {
-                        pathValue.head = defaultHead;
-                    }
-                    break;
-            }
-        });
-
-        tmpPaths[this.state.tmpResourceName] = pathValue;
-        this.setState({ paths: tmpPaths });
-    }
-    updatePath(path, method, value) {
-        const tmpPaths = this.state.paths;
-        if (value === null) {
-            delete tmpPaths[path][method];
-        } else {
-            tmpPaths[path][method] = value;
-        }
-        this.setState({ paths: tmpPaths });
-    }
-    updateResources() {
-        const tmpSwagger = this.state.swagger;
-        tmpSwagger.paths = this.state.paths;
-        const api = this.state.api;
-
-        const promised_api = api.updateSwagger(this.state.swagger);
-        promised_api
+    updateOperations() {
+        const api = this.state.api.body;
+        api.operations = this.state.operationList;
+        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+        /* eslint no-param-reassign: ["error", { "props": false }] */
+        if (api._data) delete api._data;
+        if (api.client) delete api.client;
+        const promisedApi = this.newApi.update(api);
+        promisedApi
             .then(() => {
-                Alert.info(`API updated successfully!`);
+                Alert.info('API updated successfully');
+                // Alert.info(intl.formatMessage({
+                //     id: 'Apis.Details.Operations.Operations.api.updated.successfully',
+                //     defaultMessage: 'API updated successfully!',
+                // }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
                     this.setState({ isAuthorize: false });
                 }
             });
-    }
-    addRemoveToDeleteList(path, method) {
-        const pathDeleteList = this.state.pathDeleteList;
-
-        const deleteRef = { path, method };
-        let itemAlreadyExisted = false;
-        for (let i = 0; i < pathDeleteList.length; i++) {
-            if (pathDeleteList[i].path === path && pathDeleteList[i].method === method) {
-                pathDeleteList.splice(i, 1);
-                itemAlreadyExisted = true;
-            }
-        }
-
-        if (!itemAlreadyExisted) {
-            pathDeleteList.push(deleteRef);
-        }
-        this.setState({ pathDeleteList });
-    }
-    handleCheckAll = (event) => {
-        const paths = this.state.paths;
-        const pathDeleteList = [];
-        if (event.target.checked) {
-            for (let i = 0; i < this.childResources.length; i++) {
-                if (this.childResources[i]) {
-                    this.childResources[i].toggleDeleteCheck(true);
-                }
-            }
-            // We iterate all the paths and add each method and path to the pathDeleteList Object
-            for (const path in paths) {
-                if (paths.hasOwnProperty(path)) {
-                    if (Object.keys(path) && Object.keys(path).length > 0) {
-                        const pathValue = paths[path];
-                        for (const method in pathValue) {
-                            if (pathValue.hasOwnProperty(method)) {
-                                pathDeleteList.push({ path, method });
-                            }
-                        }
-                    } else {
-                        console.debug('Error with path object');
-                    }
-                }
-            }
-            this.setState({ allChecked: true });
-            this.setState({ pathDeleteList });
-        } else {
-            for (let i = 0; i < this.childResources.length; i++) {
-                if (this.childResources[i]) {
-                    this.childResources[i].toggleDeleteCheck(false);
-                }
-            }
-            this.setState({ allChecked: false });
-            this.setState({ pathDeleteList: [] });
-        }
-    };
-    deleteSelected = () => {
-        const tmpPaths = this.state.paths;
-        const pathDeleteList = this.state.pathDeleteList;
-        for (let i = 0; i < pathDeleteList.length; i++) {
-            delete tmpPaths[pathDeleteList[i].path][pathDeleteList[i].method];
-            const indexesToDelete = [];
-            for (let j = 0; j < this.childResources.length; j++) {
-                if (this.childResources[j]) {
-                    if (this.childResources[j].props.path === pathDeleteList[i].path && this.childResources[j].props.method === pathDeleteList[i].method) {
-                        indexesToDelete.push(j);
-                    }
-                }
-            }
-            for (let j = 0; j < indexesToDelete.length; j++) {
-                this.childResources.splice(j, 1); // Remove react child from reference array
-            }
-        }
-        for (let i = 0; i < pathDeleteList.length; i++) {
-            pathDeleteList.splice(i, 1); // Remove the item from waiting to be deleted list
-        }
-
-        this.setState({ pathDeleteList });
-        this.setState({ path: tmpPaths });
-        for (let i = 0; i < this.childResources.length; i++) {
-            if (this.childResources[i]) {
-                this.childResources[i].toggleDeleteCheck(false);
-            }
-        }
-    };
-    toggleAddResource = () => {
-        this.setState({showAddResource: !this.state.showAddResource, showScopes: false});
     }
     toggleAssignScopes = () => {
-        this.setState({showScopes: !this.state.showScopes, showAddResource: false});
+        this.setState({ showScopes: !this.state.showScopes });
     }
     render() {
-        const { api, showAddResource, apiScopes, showScopes, isAuthorize } = this.state;
-
-        if (!isAuthorize) {
-            doRedirectToLogin();
-        }
+        const {
+            operationList, scopes, showScopes, apiPolicies,
+        } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
-        if (!api) {
+        if (!this.props.api) {
             return <Progress />;
         }
-        //const selectBefore = <span>/SwaggerPetstore/1.0.0</span>;
-        const plainOptions = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'];
-        const paths = this.state.paths;
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        Operations
+                        <FormattedMessage id='Apis.Details.Operations.Operations.operation' defaultMessage='Operations' />
                     </Typography>
-                    <Button size="small" className={classes.button} onClick={this.toggleAssignScopes}>
+                    <Button size='small' className={classes.button} onClick={this.toggleAssignScopes}>
                         <ScopesIcon className={classes.buttonIcon} />
-                        Assign Global Scope for API
+                        <FormattedMessage
+                            id='Apis.Details.Resources.Resources.assign.global.scope.for.api'
+                            defaultMessage='Assign Global Scope for API'
+                        />
                     </Button>
                 </div>
                 <div className={classes.contentWrapper}>
-                    {showAddResource &&
-                    <React.Fragment>
-                        <div className={classes.addNewWrapper}>
-                            <Typography className={classes.addNewHeader}>
-                                Add New Resource
-                            </Typography>
-                            <Divider className={classes.divider} />
-                            <div className={classes.addNewOther}>
-                                <TextField
-                                    required
-                                    id="outlined-required"
-                                    label="URL Pattern"
-                                    margin="normal"
-                                    variant="outlined"
-                                    id='tmpResourceName'
-                                    className={classes.addResource}
-                                    value={this.state.tmpResourceName}
-                                    onChange={this.onChangeInput('tmpResourceName')}
+                    {(this.state.scopes && showScopes) &&
+                        <React.Fragment>
+                            <div className={classes.addNewWrapper}>
+                                <Typography className={classes.addNewHeader}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.title'
+                                        defaultMessage='Assign Global Scopes for API'
                                     />
-                                    <div className={classes.radioGroup}>
-                                        {plainOptions.map((option, index) => (
-                                            <FormGroup key={index} row>
-                                                <FormControlLabel control={<Checkbox checked={this.state.tmpMethods.indexOf(option) > -1} onChange={this.handleChange(option)} value={option} />} label={option.toUpperCase()} />
-                                            </FormGroup>
-                                        ))}
-                                    </div>
+                                </Typography>
+                                <Divider className={classes.divider} />
+                                <div className={classes.addNewOther}>
+                                    <FormControl className={classes.formControl}>
+                                        <InputLabel htmlFor='select-multiple'><FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input' defaultMessage='Assign Global Scopes for API' /></InputLabel>
+                                        <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
+                                            {scopes.list.map(tempScope => (
+                                                <MenuItem
+                                                    key={tempScope.name}
+                                                    value={tempScope.name}
+                                                    style={{
+                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                                        width: 400,
+                                                    }}
+                                                >
+                                                    {tempScope.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                                <Divider className={classes.divider} />
+                                <div className={classes.addNewOther}>
+                                    <Button variant='contained' color='primary' onClick={this.handleScopeChange}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.button'
+                                            defaultMessage='Assign global scopes for API'
+                                        />
+                                    </Button>
+                                    <Button className={classes.button} onClick={this.toggleAssignScopes}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </div>
                             </div>
-                            <Divider className={classes.divider} />
-                            <div className={classes.addNewOther}>
-                                <Button variant="contained" color="primary" onClick={this.addResources}>
-                                    Add Resources to Path
-                                </Button>
-                                <Button className={classes.button} onClick={this.toggleAddResource}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </div>
-                    </React.Fragment>}
-
-                    {(apiScopes && showScopes) &&
-                          <React.Fragment>
-                          <div className={classes.addNewWrapper}>
-                              <Typography className={classes.addNewHeader}>
-                                  Assign Global Scopes for API
-                              </Typography>
-                              <Divider className={classes.divider} />
-                              <div className={classes.addNewOther}>
-                                <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor='select-multiple'>Assign Global Scopes for API</InputLabel>
-                                    <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
-                                        {apiScopes.list.map(tempScope => (
-                                            <MenuItem
-                                                key={tempScope.name}
-                                                value={tempScope.name}
-                                                style={{
-                                                    fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
-                                                    width: 400,
-                                                }}
-                                            >
-                                                {tempScope.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                              </div>
-                              <Divider className={classes.divider} />
-                              <div className={classes.addNewOther}>
-                                  <Button variant="contained" color="primary" onClick={this.handleScopeChange}>
-                                      Assign global scopes for API
-                                  </Button>
-                                  <Button className={classes.button} onClick={this.toggleAssignScopes}>
-                                      Cancel
-                                  </Button>
-                              </div>
-                          </div>
-                      </React.Fragment>
+                        </React.Fragment>
                     }
-
                     <List>
-                        {this.state.paths && (
-                            <ListItem>
-                                <FormControlLabel control={<Checkbox checked={this.state.allChecked} onChange={this.handleCheckAll} value='' />} label='Check All' />
-                                {Object.keys(this.state.pathDeleteList).length !== 0 && (
-                                    <ListItemSecondaryAction>
-                                        <Button className={classes.button} color='secondary' onClick={this.deleteSelected}>
-                                            Delete Selected
-                                        </Button>
-                                    </ListItemSecondaryAction>
-                                )}
-                            </ListItem>
-                        )}
-                        {Object.keys(paths).map((key) => {
-                            const path = paths[key];
-                            const that = this;
-                            return <div>
-                                <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
-                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                    <Typography className={classes.heading} variant='h6'>{key}</Typography>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                                        {Object.keys(path).map((innerKey) => {
-                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={apiScopes} addRemoveToDeleteList={that.addRemoveToDeleteList} onRef={ref => this.childResources.push(ref)} />;
-                                        })}
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
-                            </div>
+                        {operationList.map((item) => {
+                            return (
+                                <div>
+                                    <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
+                                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Typography className={classes.heading} variant='h6'>{item.target}
+                                            </Typography>
+                                        </ExpansionPanelSummary>
+                                        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                                            <Operation
+                                                operation={item}
+                                                handleUpdateList={this.handleUpdateList}
+                                                scopes={this.api.scopes}
+                                                apiPolicies={apiPolicies}
+                                            />
+                                        </ExpansionPanelDetails>
+                                    </ExpansionPanel>
+                                </div>
+                            );
                         })}
                     </List>
-                    <Button variant="contained" color="primary" className={classes.buttonMain} onClick={this.updateResources} >
-                        Save
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.buttonMain}
+                        onClick={this.updateOperations}
+                    >
+                        <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
                     </Button>
                 </div>
             </div>
@@ -643,4 +367,4 @@ Operations.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Operations);
+export default injectIntl(withStyles(styles)(Operations));
