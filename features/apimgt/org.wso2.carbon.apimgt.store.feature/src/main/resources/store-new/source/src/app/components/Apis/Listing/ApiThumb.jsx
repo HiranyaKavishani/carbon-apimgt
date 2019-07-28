@@ -20,6 +20,7 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
+import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -140,7 +141,6 @@ class ApiThumb extends React.Component {
                     {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
                     {defaultImage && <img src={defaultImage} />}
                 </Link>
-
                 <div
                     className={classNames(classes.thumbContent, {
                         [classes.imageOverlap]: imageThumbnail.contentPictureOverlap,
@@ -154,7 +154,6 @@ class ApiThumb extends React.Component {
                     <Typography variant='caption' gutterBottom align='left'>
                         <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by' />
                         {provider}
-
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
@@ -173,9 +172,18 @@ class ApiThumb extends React.Component {
                         </div>
                     </div>
                     <div className={classes.thumbInfo}>
-                        <Typography variant='subheading' gutterBottom align='left'>
-                            <StarRatingBar rating={rating} starColor={starColor} />
-                        </Typography>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                <StarRatingBar rating={rating} starColor={starColor} />
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant='subheading' gutterBottom align='right'>
+                                {api.type === 'GRAPHQL' && (
+                                    <Chip label={api.type} color='primary' />
+                                )}
+                            </Typography>
+                        </div>
                     </div>
                 </div>
             </Grid>

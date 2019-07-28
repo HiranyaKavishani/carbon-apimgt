@@ -26,10 +26,13 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import mimeTypes from './MimeTypes';
+
 const suggestions = mimeTypes;
 
 function renderInput(inputProps) {
-    const { InputProps, classes, ref, ...other } = inputProps;
+    const {
+        InputProps, classes, ref, ...other
+    } = inputProps;
 
     return (
         <TextField
@@ -46,7 +49,9 @@ function renderInput(inputProps) {
     );
 }
 
-function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
+function renderSuggestion({
+    suggestion, index, itemProps, highlightedIndex, selectedItem,
+}) {
     const isHighlighted = highlightedIndex === index;
     const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
 
@@ -55,7 +60,7 @@ function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, sele
             {...itemProps}
             key={suggestion.label}
             selected={isHighlighted}
-            component="div"
+            component='div'
             style={{
                 fontWeight: isSelected ? 500 : 400,
             }}
@@ -79,15 +84,15 @@ function getSuggestions(value) {
 
     return inputLength === 0
         ? []
-        : suggestions.filter(suggestion => {
-              const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+        : suggestions.filter((suggestion) => {
+            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
 
-              if (keep) {
-                  count += 1;
-              }
+            if (keep) {
+                count += 1;
+            }
 
-              return keep;
-          });
+            return keep;
+        });
 }
 
 class SelectContentType extends React.Component {
@@ -96,7 +101,7 @@ class SelectContentType extends React.Component {
         selectedItem: [],
     };
 
-    handleKeyDown = event => {
+    handleKeyDown = (event) => {
         const { inputValue, selectedItem } = this.state;
         if (selectedItem.length && !inputValue.length && event.keyCode === 8) {
             this.setState({
@@ -105,11 +110,11 @@ class SelectContentType extends React.Component {
         }
     };
 
-    handleInputChange = event => {
+    handleInputChange = (event) => {
         this.setState({ inputValue: event.target.value });
     };
 
-    handleChange = item => {
+    handleChange = (item) => {
         let { selectedItem } = this.state;
 
         if (selectedItem.indexOf(item) === -1) {
@@ -123,7 +128,7 @@ class SelectContentType extends React.Component {
     };
 
     handleDelete = item => () => {
-        this.setState(state => {
+        this.setState((state) => {
             const selectedItem = [...state.selectedItem];
             selectedItem.splice(selectedItem.indexOf(item), 1);
             return { selectedItem };
@@ -140,7 +145,7 @@ class SelectContentType extends React.Component {
         const { inputValue, selectedItem } = this.state;
         return (
             <Downshift
-                id="downshift-multiple"
+                id='downshift-multiple'
                 inputValue={inputValue}
                 onChange={this.handleChange}
                 selectedItem={value}
@@ -180,8 +185,7 @@ class SelectContentType extends React.Component {
                                         itemProps: getItemProps({ item: suggestion.label }),
                                         highlightedIndex,
                                         selectedItem: selectedItem2,
-                                    }),
-                                )}
+                                    }))}
                             </Paper>
                         ) : null}
                     </div>

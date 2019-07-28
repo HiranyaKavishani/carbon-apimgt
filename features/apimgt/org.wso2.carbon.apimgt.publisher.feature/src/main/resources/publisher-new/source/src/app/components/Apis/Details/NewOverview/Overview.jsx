@@ -123,6 +123,24 @@ function Overview(props) {
         loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
     }
+    function getResourcesClassForAPIs(apiType, api) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <Operations parentClasses={classes} api={api} />;
+            case 'Product':
+                return <ProductResources parentClasses={classes} api={api} />;
+            default:
+                return <Resources parentClasses={classes} api={api} />;
+        }
+    }
+    function getItemSuccessLabelForAPIType(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <CheckItem itemSuccess itemLabel='Operations' />;
+            default:
+                return <CheckItem itemSuccess itemLabel='Resources' />;
+        }
+    }
     return (
         <ApiContext.Consumer>
             {({ api, isAPIProduct }) => (
@@ -132,11 +150,8 @@ function Overview(props) {
                         <Grid container>
                             {isAPIProduct ? null : (<CheckItem itemSuccess itemLabel='Endpoints' />)}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
-                            {api.type === "GRAPHQL" ? (
-                             <CheckItem itemSuccess itemLabel='Operations' />
-                            ) : (<CheckItem itemSuccess itemLabel='Resources' />)}
+                            {getItemSuccessLabelForAPIType(api.type)}
                             <CheckItem itemSuccess={false} itemLabel='Scopes' />
-                            <CheckItem itemSuccess itemLabel='Resources' />
                             {isAPIProduct ? null : (<CheckItem itemSuccess={false} itemLabel='Scopes' />)}
                             <CheckItem itemSuccess={false} itemLabel='Documents' />
                             <CheckItem itemSuccess={false} itemLabel='Business Information' />
@@ -147,11 +162,7 @@ function Overview(props) {
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
-                                {api.type === "GRAPHQL" ? (
-                             <Operations parentClasses={classes} api={api} />)
-                              : (<Resources parentClasses={classes} api={api} />)}
-                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
-                                    (loadResources)}
+                                {getResourcesClassForAPIs(api.type, api)}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>

@@ -18,16 +18,10 @@
 import React, { Component } from 'react';
 import {
     withStyles,
-    RadioGroup,
-    Radio,
-    Button,
-    FormControl,
     FormHelperText,
-    FormControlLabel,
 } from '@material-ui/core';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';
 import { FormattedMessage } from 'react-intl';
@@ -133,7 +127,7 @@ class ProvideGraphQL extends Component {
     }
 
     handleUploadFile = (acceptedFiles) => {
-        this.setState({ file: acceptedFiles[0]},()=>{
+        this.setState({ file: acceptedFiles[0] }, () => {
             this.validateGraphQL();
         });
     };
@@ -144,14 +138,14 @@ class ProvideGraphQL extends Component {
      */
     validateGraphQL() {
         // do not invoke callback in case of React SyntheticMouseEvent
-        const {file } = this.state;
+        const { file } = this.state;
         const { valid, updateFileErrors, updateGraphQLBean } = this.props;
         this.setState({ loading: true });
         const newAPI = new API();
-        let promisedValidation;
+        let promisedValidation = {};
         const graphQLBean = {};
         const validNew = JSON.parse(JSON.stringify(valid));
-     
+
         if (!file) {
             // Update the parent's state
             validNew.graphQLFile.empty = true;
@@ -162,7 +156,7 @@ class ProvideGraphQL extends Component {
         validNew.graphQLFile.empty = false;
         updateFileErrors(validNew);
         promisedValidation = newAPI.validateGraphQLFile(file);
-        
+
         promisedValidation
             .then((response) => {
                 const { isValid, graphQLInfo } = response.obj;
@@ -180,7 +174,8 @@ class ProvideGraphQL extends Component {
                 updateGraphQLBean(graphQLBean);
                 const response = error.response && error.response.obj;
                 const message =
-                    'Error while validating GraphQL!! ' + response && '[' + response.message + '] ' + response.description;
+                    'Error while validating GraphQL!! ' + response && '[' + response.message + '] '
+                    + response.description;
                 this.setState({ isValid: false, errorMessage: message, loading: false });
                 console.error(error);
             });
@@ -202,58 +197,57 @@ class ProvideGraphQL extends Component {
         }
         return (
             <React.Fragment>
-                    <React.Fragment>
-                        {file && (
-                            <div className={classes.fileNameWrapper}>
-                                <Typography variant='subtitle2' gutterBottom>
-                                    <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
+                <React.Fragment>
+                    {file && (
+                        <div className={classes.fileNameWrapper}>
+                            <Typography variant='subtitle2' gutterBottom>
+                                <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
+                            </Typography>
+                            <div className={classes.fileName}>
+                                <Typography variant='body2' gutterBottom>
+                                    {file.name} - {file.size} bytes
                                 </Typography>
-                                <div className={classes.fileName}>
-                                    <Typography variant='body2' gutterBottom>
-                                        {file.name} - {file.size} bytes
-                                    </Typography>
-                                </div>
                             </div>
+                        </div>
+                    )}
+                    {valid.graphQLFile.invalidFile && (
+                        <div className={classes.errorMessageWrapper}>
+                            <ErrorOutline className={classes.errorIcon} />
+                            <Typography variant='body2' gutterBottom className={classes.errorMessage}>
+                                {errorMessage}
+                            </Typography>
+                        </div>
+                    )}
+                    <Dropzone
+                        onDrop={this.handleUploadFile}
+                        multiple={false}
+                        className={classNames(classes.dropZone, {
+                            [classes.dropZoneErrorBox]: valid.graphQLFile.empty,
+                        })}
+                    >
+                        <Backup className={classes.dropZoneIcon} />
+                        <div>
+                            <FormattedMessage
+                                id='try.dropping.schema.file.here.or.click.to.select.schema.to.upload'
+                                defaultMessage='Try dropping schema file here, or click to select schema to upload.'
+                            />
+                        </div>
+                    </Dropzone>
+                    <FormHelperText className={classes.errorMessage}>
+                        {valid.graphQLFile.empty && (
+                            <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
                         )}
                         {valid.graphQLFile.invalidFile && (
-                            <div className={classes.errorMessageWrapper}>
-                                <ErrorOutline className={classes.errorIcon} />
-                                <Typography variant='body2' gutterBottom className={classes.errorMessage}>
-                                    {errorMessage}
-                                </Typography>
-                            </div>
+                            <FormattedMessage id='error.invalid.graphql.file' defaultMessage='Invalid GraphQL File' />
                         )}
-                        <Dropzone
-                            onDrop={this.handleUploadFile}
-                            multiple={false}
-                            className={classNames(classes.dropZone, {
-                                [classes.dropZoneErrorBox]: valid.graphQLFile.empty,
-                            })}
-                        >
-                            <Backup className={classes.dropZoneIcon} />
-                            <div>
-                                <FormattedMessage
-                                    id='try.dropping.schema.file.here.or.click.to.select.schema.to.upload'
-                                    defaultMessage='Try dropping schema file here, or click to select schema to upload.'
-                                />
-                            </div>
-                        </Dropzone>
-                        <FormHelperText className={classes.errorMessage}>
-                            {valid.graphQLFile.empty && (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            )}
-                            {valid.graphQLFile.invalidFile && (
-                                <FormattedMessage id='error.invalid.graphql.file' defaultMessage='Invalid GraphQL File' />
-                            )}
-                        </FormHelperText>
-                    </React.Fragment>
+                    </FormHelperText>
+                </React.Fragment>
             </React.Fragment>
         );
     }
 }
 
 ProvideGraphQL.defaultProps = {
-    uploadMethod: 'file',
     file: {},
 };
 
