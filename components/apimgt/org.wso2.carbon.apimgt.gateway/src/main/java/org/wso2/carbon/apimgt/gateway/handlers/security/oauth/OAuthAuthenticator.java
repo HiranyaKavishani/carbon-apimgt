@@ -32,15 +32,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -241,14 +238,7 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
-            String matchingResource = "";
-            String graphQLOperationList = (String) synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE);
-            if (graphQLOperationList != null) {
-                httpVerb = synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_TYPE).toString();
-                matchingResource = graphQLOperationList;
-            } else {
-                matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-            }
+            String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
             }
