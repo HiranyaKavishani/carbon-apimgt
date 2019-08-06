@@ -118,13 +118,11 @@ const styles = theme => ({
 
 function Overview(props) {
     const { classes, api: newApi } = props;
-    let loadResources;
     let loadScopes;
     let loadEndpoints;
     let endpointsCheckItem;
     let scopesCheckItem;
     if (newApi.type !== 'WS') {
-        loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
     }
     function getResourcesClassForAPIs(apiType, api) {

@@ -722,6 +722,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
+        debugger;
         const promised_update = this.client.then((client) => {
             const payload = {
                 apiId: api.id,
