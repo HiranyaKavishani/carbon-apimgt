@@ -231,16 +231,15 @@
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.localentry.stub</artifactId>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java</artifactId>
-            <version>13.0</version>
-            <scope>compile</scope>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+            <version>13.0.wso2v1</version>
         </dependency>
     </dependencies>
 
@@ -382,6 +381,7 @@
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="1.2.wso2v1",
+                            org.wso2.orbit.graphQL.*;version="13.0.wso2v1",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
