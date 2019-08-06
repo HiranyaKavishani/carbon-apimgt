@@ -177,6 +177,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <exclusions>
@@ -235,11 +239,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.graphQL</groupId>
-            <artifactId>graphQL</artifactId>
-            <version>13.0.wso2v1</version>
         </dependency>
     </dependencies>
 
