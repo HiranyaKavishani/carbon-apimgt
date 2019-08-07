@@ -446,7 +446,7 @@ class Details extends Component {
                                 active={active}
                                 Icon={<EndpointIcon />}
                             />
-                        )}
+                        }
                         {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
