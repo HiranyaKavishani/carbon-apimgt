@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ public class APIProduct {
     private String context;
     private String description;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private Set<String> tags = new LinkedHashSet<String>();
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
@@ -371,5 +373,16 @@ public class APIProduct {
                 + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
                 + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
                 + tenantDomain + ", productResources=" + productResources + "]";
+    }
+
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(tags);
+    }
+
+    public void addTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    public void removeTags(Set<String> tags) {
+        this.tags.removeAll(tags);
     }
 }
