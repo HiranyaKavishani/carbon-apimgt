@@ -134,6 +134,7 @@ public enum AccessControlEnum {
     private AccessControlEnum accessControl = null;
     private List<String> accessControlRoles = new ArrayList<>();
     private List<String> gatewayEnvironments = new ArrayList<>();
+    private String apiType = null;
     private List<String> transport = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
@@ -415,6 +416,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * The api type to be used. Accepted values are API, API PRODUCT
+   **/
+  public APIProductDTO apiType(String apiType) {
+    this.apiType = apiType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APIProduct", value = "The api type to be used. Accepted values are API, API PRODUCT")
+  @JsonProperty("apiType")
+  public String getApiType() {
+    return apiType;
+  }
+  public void setApiType(String apiType) {
+    this.apiType = apiType;
+  }
+
+  /**
    * Supported transports for the API (http and/or https). 
    **/
   public APIProductDTO transport(List<String> transport) {
@@ -681,6 +700,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(accessControl, apIProduct.accessControl) &&
         Objects.equals(accessControlRoles, apIProduct.accessControlRoles) &&
         Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
+        Objects.equals(apiType, apIProduct.apiType) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(tags, apIProduct.tags) &&
         Objects.equals(policies, apIProduct.policies) &&
@@ -699,7 +719,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, tags, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
@@ -720,6 +740,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
+    sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
