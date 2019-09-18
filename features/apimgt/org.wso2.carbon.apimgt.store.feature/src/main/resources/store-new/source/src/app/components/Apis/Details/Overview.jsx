@@ -281,14 +281,14 @@ function Overview(props) {
                                     />
                                 </Typography>
                                 <Typography className={classes.subheading}>
-                                    {" " + (totalComments > 3 ? 3 : totalComments) + ' of ' + totalComments}
+                                    {' ' + (totalComments > 3 ? 3 : totalComments) + ' of ' + totalComments}
                                 </Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                {api && <Comments apiId={api.id} showLatest isOverview={true} setCount={setCount} />}
+                                {api && <Comments apiId={api.id} showLatest isOverview setCount={setCount} />}
                             </ExpansionPanelDetails>
                             <Divider />
-                            <ExpansionPanelActions className={classes.actionPanel} >
+                            <ExpansionPanelActions className={classes.actionPanel}>
                                 <Link to={'/apis/' + api.id + '/comments'} className={classes.button}>
                                     <Button size='small' color='primary'>
                                         <FormattedMessage
@@ -432,8 +432,8 @@ function Overview(props) {
 
 
 Overview.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.instanceOf(Object).isRequired,
+    theme: PropTypes.instanceOf(Object).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Overview);
