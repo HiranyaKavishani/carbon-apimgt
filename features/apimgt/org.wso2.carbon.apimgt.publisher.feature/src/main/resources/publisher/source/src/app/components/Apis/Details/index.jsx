@@ -490,6 +490,7 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
+                        {!isAPIProduct &&
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.left.menu.scope',
@@ -498,6 +499,7 @@ class Details extends Component {
                             to={pathPrefix + 'scopes'}
                             Icon={<ScopesIcon />}
                         />
+                        }
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -530,7 +532,7 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-
+                        {!isAPIProduct &&
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.left.menu.mediation.policies',
@@ -538,7 +540,7 @@ class Details extends Component {
                             })}
                             to={pathPrefix + 'mediation policies'}
                             Icon={<ScopesIcon />}
-                        />
+                        />}
                         {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -629,7 +631,8 @@ class Details extends Component {
                                 />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
+                                {/* <Route path={Details.subPaths.SCOPES_PRODUCT} component={() =>
+                                <Scope api={api} />} /> */}
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -637,6 +640,10 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
                                     component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
@@ -706,6 +713,7 @@ Details.subPaths = {
     MEDIATION_POLICIES_PRODUCT: '/api-products/:apiprod_uuid/mediation policies',
     DOCUMENTS: '/apis/:api_uuid/documents',
     DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
+    SUBSCRIPTIONS_PRODUCT: '/api-products/:apiprod_uuid/subscriptions',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',
