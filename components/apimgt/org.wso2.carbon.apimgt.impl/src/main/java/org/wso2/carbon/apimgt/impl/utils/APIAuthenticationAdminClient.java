@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.databridge.commons.Event;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -49,7 +50,8 @@ public class APIAuthenticationAdminClient {
         }
         api.put("resources", resources);
 
-        Object[] objectData = new Object[]{APIConstants.RESOURCE_CACHE_NAME, api.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.RESOURCE_CACHE_NAME,
+                StringEscapeUtils.escapeJava(api.toJSONString())};
         log.debug("Sending Resource Invalidation Message");
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
@@ -64,7 +66,8 @@ public class APIAuthenticationAdminClient {
 
         JSONArray tokenArray = new JSONArray();
         tokenArray.addAll(activeTokens);
-        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME, tokenArray.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME,
+                StringEscapeUtils.escapeJava(tokenArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
@@ -89,10 +92,10 @@ public class APIAuthenticationAdminClient {
 
         JSONArray userArray = new JSONArray();
         userArray.addAll(Arrays.asList(username_list));
-        Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME, userArray.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                StringEscapeUtils.escapeJava(userArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
     }
-
 }
