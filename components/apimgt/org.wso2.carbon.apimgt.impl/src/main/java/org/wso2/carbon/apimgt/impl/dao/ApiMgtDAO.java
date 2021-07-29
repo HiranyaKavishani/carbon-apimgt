@@ -7054,6 +7054,7 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
 
             // Delete records from AM_API table and associated data from cascade delete
             prepStmt = connection.prepareStatement(deleteAPIQuery);
@@ -7066,7 +7067,6 @@ public class ApiMgtDAO {
 
             //Delete Cleanup tasks
             prepStmt = connection.prepareStatement(deleteCleanUpTasksQuery);
-            connection.setAutoCommit(false);
             prepStmt.setString(1, apiUUIdList);
             prepStmt.executeUpdate();
             prepStmt.close();
