@@ -7047,8 +7047,8 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
-        String apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).
-                collect(Collectors.joining(","));
+        String apiUUIdList = apiIdentifiers.stream().map(APIIdentifier::getUUID).collect(Collectors.
+                joining("','", "'", "'"));
         String deleteAPIQuery = SQLConstants.REMOVE_BULK_APIS_DATA_FROM_AM_API_SQL;
         String deleteCleanUpTasksQuery = SQLConstants.DELETE_BULK_API_WORKFLOWS_REQUEST_SQL;
 

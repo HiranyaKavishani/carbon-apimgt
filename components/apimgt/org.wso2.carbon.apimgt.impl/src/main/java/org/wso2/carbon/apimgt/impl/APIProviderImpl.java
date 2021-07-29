@@ -3509,6 +3509,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // delete gateway artifacts
         GatewayArtifactsMgtDAO.getInstance().removeOrganizationGatewayArtifacts(apiIdentifierList);
 
+        try {
+            apiPersistenceInstance.deleteAPIs(new Organization(orgId));
+        } catch (APIPersistenceException e) {
+            handleException("Failed to delete organization data " + orgId, e);
+        }
+
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API,
                 new Gson().toJson(apiIdentifierList), APIConstants.AuditLogConstants.DELETED, username);
     }

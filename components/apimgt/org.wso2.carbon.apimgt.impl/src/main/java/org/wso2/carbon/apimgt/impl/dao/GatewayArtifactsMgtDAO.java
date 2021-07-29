@@ -637,7 +637,8 @@ public class GatewayArtifactsMgtDAO {
      */
     public void removeOrganizationGatewayArtifacts(List<APIIdentifier> apiIdentifierList)
             throws APIManagementException {
-        String apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).collect(Collectors.joining(","));
+        String apiIdList = apiIdentifierList.stream().map(APIIdentifier::getUUID).
+                collect(Collectors.joining("','", "'", "'"));
         try (Connection artifactSynchronizerConn = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             // Delete gateway Artifacts from AM_GW_PUBLISHED_API_DETAILS, FK->AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS
             try (PreparedStatement preparedStatement = artifactSynchronizerConn.
