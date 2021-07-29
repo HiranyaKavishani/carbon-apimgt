@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.cleanup.service.organizationPurge;
 
-import javax.ws.rs.core.Response;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public interface OrganizationPurge {
-      Response deleteOrganization (String organizationId);
+      void deleteOrganization (String organization) throws APIManagementException;
 }
