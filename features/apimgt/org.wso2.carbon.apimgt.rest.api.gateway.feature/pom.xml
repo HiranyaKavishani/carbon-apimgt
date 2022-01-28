@@ -91,7 +91,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#gateway#v2.war</destFileName>
+                                    <destFileName>api#am#gateway#v2.1.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -114,7 +114,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#gateway#v2.war</include>
+                                        <include>api#am#gateway#v2.1.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>
