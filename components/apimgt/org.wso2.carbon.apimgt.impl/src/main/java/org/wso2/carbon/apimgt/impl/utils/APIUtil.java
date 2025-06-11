@@ -4673,7 +4673,7 @@ public final class APIUtil {
      */
     public static String getSequenceExtensionName(API api) {
 
-        return api.getId().getApiName() + ":v" + api.getId().getVersion();
+        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + api.getId().getApiName() + ":v" + api.getId().getVersion();
     }
 
     /**
@@ -4685,7 +4685,7 @@ public final class APIUtil {
      */
     public static String getEndpointSequenceName(API api) {
 
-        return api.getId().getApiName() + "--" + api.getId().getVersion();
+        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + api.getId().getApiName() + "--" + api.getId().getVersion();
     }
 
     /**
