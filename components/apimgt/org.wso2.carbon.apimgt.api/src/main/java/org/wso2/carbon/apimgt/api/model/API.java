@@ -53,6 +53,7 @@ public class API implements Serializable {
     // uuid of registry artifact
     // this id is provider's username independent
     private String uuid;
+    private String displayName;
 
     private String description;
     private String url;
@@ -195,6 +196,7 @@ public class API implements Serializable {
     // API security at the gateway level.
     private String apiSecurity = "oauth2";
 
+    private boolean isInitiatedFromGateway = false;
     private static final String NULL_VALUE = "NULL";
 
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
@@ -1048,6 +1050,40 @@ public class API implements Serializable {
     @UsedByMigrationClient
     public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
         this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+    }
+
+    /**
+     * Set if the API is initiated from gateway or not
+     *
+     * @param initiatedFromGateway
+     */
+    public void setInitiatedFromGateway(boolean initiatedFromGateway) {
+        isInitiatedFromGateway = initiatedFromGateway;
+    }
+
+    /**
+     * Returns whether the API is initiated from gateway or not
+     *
+     * @return true if the API is initiated from gateway, false otherwise
+     */
+    public boolean isInitiatedFromGateway() {
+        return isInitiatedFromGateway;
+    }
+
+    /**
+     * Set API Display Name
+     * @param displayName
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Get API Display Name
+     * @return displayName
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getEndpointConfig() {
