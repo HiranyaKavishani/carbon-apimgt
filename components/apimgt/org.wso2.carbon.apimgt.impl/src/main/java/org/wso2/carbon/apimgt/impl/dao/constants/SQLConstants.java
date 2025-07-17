@@ -1723,7 +1723,8 @@ public class SQLConstants {
                     "   API_TYPE = ?, " +
                     "   GATEWAY_VENDOR = ?, " +
                     "   SUB_VALIDATION = ?, " +
-                    "   API_DISPLAY_NAME = ? " +
+                    "   API_DISPLAY_NAME = ?, " +
+                    "   IS_INITIATED_FROM_GW = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
