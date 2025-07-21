@@ -196,7 +196,7 @@ public class API implements Serializable {
     // API security at the gateway level.
     private String apiSecurity = "oauth2";
 
-    private boolean isInitiatedFromGateway = false;
+    private boolean initiatedFromGateway = false;
     private static final String NULL_VALUE = "NULL";
 
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
@@ -1058,7 +1058,7 @@ public class API implements Serializable {
      * @param initiatedFromGateway
      */
     public void setInitiatedFromGateway(boolean initiatedFromGateway) {
-        isInitiatedFromGateway = initiatedFromGateway;
+        this.initiatedFromGateway = initiatedFromGateway;
     }
 
     /**
@@ -1067,7 +1067,7 @@ public class API implements Serializable {
      * @return true if the API is initiated from gateway, false otherwise
      */
     public boolean isInitiatedFromGateway() {
-        return isInitiatedFromGateway;
+        return initiatedFromGateway;
     }
 
     /**
