@@ -135,6 +135,8 @@ import java.util.Set;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_NAME_DELIMITER;
+
 /**
  * This class usesd to utility for Import API.
  */
@@ -253,10 +255,11 @@ public class ImportUtils {
             if (importedApiDTO.isInitiatedFromGateway() && !overwrite &&
                     ApiMgtDAO.getInstance().isApiNameExist(importedApiDTO.getName(), organization, organization)) {
                 if (!apiRevisionDeployments.isEmpty()) {
-                    importedApiDTO.name(importedApiDTO.getName() + "-" + apiRevisionDeployments.get(0).getDeployment());
+                    importedApiDTO.name(importedApiDTO.getName() + API_NAME_DELIMITER + apiRevisionDeployments.get(0)
+                            .getDeployment());
                 } else {
-                    importedApiDTO.name(importedApiDTO.getName() + "-" + UUID.randomUUID().toString().
-                            replace("-", "").substring(0, 4));
+                    importedApiDTO.name(importedApiDTO.getName() + API_NAME_DELIMITER + UUID.randomUUID().toString().
+                            replace(API_NAME_DELIMITER, "").substring(0, 4));
                 }
             }
 
@@ -334,7 +337,6 @@ public class ImportUtils {
 
                 // Drop any API Endpoints (if exists)
                 dropAPIEndpoints(targetApi, apiProvider);
-
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
                     APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
