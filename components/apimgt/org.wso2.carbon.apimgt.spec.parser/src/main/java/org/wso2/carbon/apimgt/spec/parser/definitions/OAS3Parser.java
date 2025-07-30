@@ -2720,14 +2720,8 @@ public class OAS3Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(
-                        template,
-                        match,
-                        mcpFeatureType,
-                        backendDefinition,
-                        backendId,
-                        refApiId
-                );
+                URITemplate toolTemplate = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2736,11 +2730,9 @@ public class OAS3Parser extends APIDefinition {
     }
 
     @Override
-    public Set<URITemplate> updateMCPTools(String backendApiDefinition,
-                                           APIIdentifier refApiId, String backendId,
-                                           String mcpFeatureType,
-                                           String mcpSubtype,
-                                           Set<URITemplate> uriTemplates) throws APIManagementException {
+    public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                           String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
         Set<URITemplate> updatedTools = new HashSet<>();
@@ -2796,8 +2788,7 @@ public class OAS3Parser extends APIDefinition {
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId)
-            throws APIManagementException {
+                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId) {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
             String operationId = Optional.ofNullable(match.operation.getOperationId())
@@ -2829,7 +2820,6 @@ public class OAS3Parser extends APIDefinition {
                 log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
             }
         }
-
         if (uriTemplate.getBackendOperationMapping() != null) {
             BackendOperation backendOperation = new BackendOperation();
             backendOperation.setVerb(match.method.toString());
@@ -2852,38 +2842,6 @@ public class OAS3Parser extends APIDefinition {
             apiOperationMap.setBackendOperation(backendOperation);
 
             uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
-        }
-        Set<Scope> scopes = getScopesFromOpenAPI(backendAPIDefinition);
-        List<String> opScopes = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, match.operation);
-        if (!opScopes.isEmpty()) {
-            if (opScopes.size() == 1) {
-                String firstScope = opScopes.get(0);
-                if (StringUtils.isNoneBlank(firstScope)) {
-                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
-                    if (scope == null) {
-                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
-                    }
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
-                }
-            } else {
-                uriTemplate = OASParserUtil.setScopesToTemplate(uriTemplate, opScopes, scopes);
-            }
-        } else if (!getScopeOfOperations("OAuth2Security", match.operation).isEmpty()) {
-            opScopes = getScopeOfOperations("OAuth2Security", match.operation);
-            if (opScopes.size() == 1) {
-                String firstScope = opScopes.get(0);
-                if (StringUtils.isNoneBlank(firstScope)) {
-                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
-                    if (scope == null) {
-                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
-                    }
-                    uriTemplate.setScope(scope);
-                    uriTemplate.setScopes(scope);
-                }
-            } else {
-                uriTemplate = OASParserUtil.setScopesToTemplate(uriTemplate, opScopes, scopes);
-            }
         }
         Map<String, Object> extensions = match.operation.getExtensions();
         if (extensions != null) {
@@ -2916,6 +2874,15 @@ public class OAS3Parser extends APIDefinition {
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
+    /**
+     * Finds a matching operation in the OpenAPI definition based on the target path and HTTP verb.
+     * Returns an OperationMatch object containing the path, method, and operation details if found.
+     *
+     * @param openAPI OpenAPI definition
+     * @param target  Target path to match
+     * @param verb    HTTP verb to match
+     * @return OperationMatch if found, null otherwise
+     */
     private OperationMatch findMatchingOperation(OpenAPI openAPI, String target, String verb) {
 
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
@@ -2930,6 +2897,10 @@ public class OAS3Parser extends APIDefinition {
         return null;
     }
 
+    /**
+     * Represents a match found in the OpenAPI definition for a specific operation.
+     * Contains the path, HTTP method, and operation details.
+     */
     private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, RequestBody requestBody,
                                                         OpenAPI openAPI) {
 
