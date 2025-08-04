@@ -184,6 +184,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
+
 /**
  * This class represent the ApiMgtDAO.
  */
@@ -6233,6 +6235,10 @@ public class ApiMgtDAO {
                 if (template.getExistingAPIOperationMapping() != null) {
                     String refApiId = template.getExistingAPIOperationMapping().getApiUuid();
                     refUriTemplates = getURITemplatesOfAPI(refApiId);
+                    if (refUriTemplates == null) {
+                        log.error("Failed to retrieve URI templates for referenced API: " + refApiId);
+                        refUriTemplates = new HashSet<>();
+                    }
                 }
             }
         }
@@ -6308,12 +6314,14 @@ public class ApiMgtDAO {
                     addBackendOperationMappingPrepStmt.setString(3,
                             uriTemplate.getBackendOperationMapping().getBackendOperation().getTarget());
                     addBackendOperationMappingPrepStmt.setString(4,
-                            uriTemplate.getBackendOperationMapping().getBackendOperation().getVerb());
+                            uriTemplate.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                     addBackendOperationMappingPrepStmt.addBatch();
                 } else if (uriTemplate.getExistingAPIOperationMapping() != null && refUriTemplates != null
                         && !refUriTemplates.isEmpty()) {
-                    String target = uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getTarget();
-                    String verb = uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getVerb();
+                    String target =
+                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getTarget();
+                    String verb =
+                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getVerb().toString();
                     URITemplate match = findMatchingTemplate(refUriTemplates, target, verb);
                     if (match != null) {
                         addApiOperationMappingPrepStmt.setInt(1, uriMappingId);
@@ -19235,7 +19243,7 @@ public class ApiMgtDAO {
                                 !backendAPIs.isEmpty()) {
                             BackendOperation backendOperation = new BackendOperation();
                             backendOperation.setTarget(target);
-                            backendOperation.setVerb(verb);
+                            backendOperation.setVerb(SupportedHTTPVerbs.valueOf(verb));
 
                             BackendAPIOperationMapping backendAPIOperationMapping = new BackendAPIOperationMapping();
                             backendAPIOperationMapping.setBackendApiId(backendAPIs.get(0).getBackendApiId());
@@ -19360,7 +19368,7 @@ public class ApiMgtDAO {
                         addBackendOperationMappingPrepStmt.setString(3,
                                 urlMapping.getBackendOperationMapping().getBackendOperation().getTarget());
                         addBackendOperationMappingPrepStmt.setString(4,
-                                urlMapping.getBackendOperationMapping().getBackendOperation().getVerb());
+                                urlMapping.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                         addBackendOperationMappingPrepStmt.addBatch();
                     } else if (urlMapping.getExistingAPIOperationMapping() != null) {
                         addApiOperationMappingPrepStmt.setInt(1, urlMapping.getId());
@@ -20295,7 +20303,7 @@ public class ApiMgtDAO {
                                 !backendAPIs.isEmpty()) {
                             BackendOperation backendOperation = new BackendOperation();
                             backendOperation.setTarget(target);
-                            backendOperation.setVerb(verb);
+                            backendOperation.setVerb(SupportedHTTPVerbs.valueOf(verb));
 
                             BackendAPIOperationMapping backendAPIOperationMapping = new BackendAPIOperationMapping();
                             backendAPIOperationMapping.setBackendApiId(backendAPIs.get(0).getBackendApiId());
@@ -20399,7 +20407,8 @@ public class ApiMgtDAO {
                                     addBackendOperationMappingPrepStmt.setString(3,
                                             urlMapping.getBackendOperationMapping().getBackendOperation().getTarget());
                                     addBackendOperationMappingPrepStmt.setString(4,
-                                            urlMapping.getBackendOperationMapping().getBackendOperation().getVerb());
+                                            urlMapping.getBackendOperationMapping().getBackendOperation().getVerb()
+                                                    .toString());
                                     addBackendOperationMappingPrepStmt.addBatch();
                                 } else if (urlMapping.getExistingAPIOperationMapping() != null) {
                                     addApiOperationMappingPrepStmt.setInt(1,
@@ -22897,7 +22906,7 @@ public class ApiMgtDAO {
 
                     BackendOperation backendOperation = new BackendOperation();
                     backendOperation.setTarget(rs.getString("TARGET"));
-                    backendOperation.setVerb(rs.getString("VERB"));
+                    backendOperation.setVerb(SupportedHTTPVerbs.valueOf(rs.getString("VERB")));
 
                     BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
                     backendOperationMap.setBackendApiId(rs.getString("BACKEND_API_ID"));
@@ -22930,7 +22939,7 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     BackendOperation backendOperation = new BackendOperation();
                     backendOperation.setTarget(rs.getString("TARGET"));
-                    backendOperation.setVerb(rs.getString("VERB"));
+                    backendOperation.setVerb(SupportedHTTPVerbs.valueOf(rs.getString("VERB")));
 
                     ExistingAPIOperationMapping existingAPIOperationMapping = new ExistingAPIOperationMapping();
                     existingAPIOperationMapping.setApiUuid(rs.getString("REF_API_UUID"));
