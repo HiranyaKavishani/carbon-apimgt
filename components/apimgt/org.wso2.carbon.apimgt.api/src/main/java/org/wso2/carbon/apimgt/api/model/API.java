@@ -1284,7 +1284,8 @@ public class API implements Serializable {
         return webSocketTopicMappingConfiguration;
     }
 
-    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration
+                                                              webSocketTopicMappingConfiguration) {
         this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
     }
 
