@@ -6618,6 +6618,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param organization identifier of the organization
      * @throws APIManagementException if failed to add APIRevision
      */
+    @Deprecated
     @Override
     @UsedByMigrationClient
     public void deployAPIRevision(String apiId, String apiRevisionUUID,
