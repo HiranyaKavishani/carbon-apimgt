@@ -2019,6 +2019,7 @@ public interface APIProvider extends APIManager {
      * @param revisionId   revision number
      * @param environment  environment the deployment is happening
      */
+    @Deprecated
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
                                    String environment);
 
