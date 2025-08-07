@@ -19243,7 +19243,7 @@ public class ApiMgtDAO {
                                 !backendAPIs.isEmpty()) {
                             BackendOperation backendOperation = new BackendOperation();
                             backendOperation.setTarget(target);
-                            backendOperation.setVerb(SupportedHTTPVerbs.valueOf(verb));
+                            backendOperation.setVerb(SupportedHTTPVerbs.fromValue(verb));
 
                             BackendAPIOperationMapping backendAPIOperationMapping = new BackendAPIOperationMapping();
                             backendAPIOperationMapping.setBackendApiId(backendAPIs.get(0).getBackendApiId());
@@ -20303,7 +20303,7 @@ public class ApiMgtDAO {
                                 !backendAPIs.isEmpty()) {
                             BackendOperation backendOperation = new BackendOperation();
                             backendOperation.setTarget(target);
-                            backendOperation.setVerb(SupportedHTTPVerbs.valueOf(verb));
+                            backendOperation.setVerb(SupportedHTTPVerbs.fromValue(verb));
 
                             BackendAPIOperationMapping backendAPIOperationMapping = new BackendAPIOperationMapping();
                             backendAPIOperationMapping.setBackendApiId(backendAPIs.get(0).getBackendApiId());
@@ -21877,10 +21877,11 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to add endpoints to API: " + apiUuid, e);
+                handleException("Failed to add backends to MCP Server: " + apiUuid, e);
             }
         } catch (SQLException e) {
-            handleException("Failed to add endpoints to API: " + apiUuid, e);
+            //Specify the connection failure error
+            handleException("Failed to add backends to MCP Server: " + apiUuid, e);
         }
     }
 
@@ -22906,7 +22907,7 @@ public class ApiMgtDAO {
 
                     BackendOperation backendOperation = new BackendOperation();
                     backendOperation.setTarget(rs.getString("TARGET"));
-                    backendOperation.setVerb(SupportedHTTPVerbs.valueOf(rs.getString("VERB")));
+                    backendOperation.setVerb(SupportedHTTPVerbs.fromValue(rs.getString("VERB")));
 
                     BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
                     backendOperationMap.setBackendApiId(rs.getString("BACKEND_API_ID"));
@@ -22939,7 +22940,7 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     BackendOperation backendOperation = new BackendOperation();
                     backendOperation.setTarget(rs.getString("TARGET"));
-                    backendOperation.setVerb(SupportedHTTPVerbs.valueOf(rs.getString("VERB")));
+                    backendOperation.setVerb(SupportedHTTPVerbs.fromValue(rs.getString("VERB")));
 
                     ExistingAPIOperationMapping existingAPIOperationMapping = new ExistingAPIOperationMapping();
                     existingAPIOperationMapping.setApiUuid(rs.getString("REF_API_UUID"));
