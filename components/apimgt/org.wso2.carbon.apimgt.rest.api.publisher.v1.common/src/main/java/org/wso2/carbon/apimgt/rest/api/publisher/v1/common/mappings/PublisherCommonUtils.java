@@ -1762,6 +1762,15 @@ public class PublisherCommonUtils {
         return updatedAPIDTO;
     }
 
+    /**
+     * Get the MCPServerDTO object in which the API field values are overridden with the user passed new values.
+     *
+     * @param apidto      The MCPServerDTO to be updated
+     * @param originalAPI The original API object
+     * @param tokenScopes The scopes from the user's access token
+     * @return Updated MCPServerDTO with overridden field values
+     * @throws APIManagementException If an error occurs during processing
+     */
     private static MCPServerDTO getFieldOverriddenMCPServerDTO(MCPServerDTO apidto, API originalAPI,
                                                                String[] tokenScopes)
             throws APIManagementException {
@@ -1772,7 +1781,7 @@ public class PublisherCommonUtils {
         try {
             originalApiDTO = APIMappingUtil.fromAPItoMCPServerDTO(originalAPI);
 
-            Field[] fields = APIDTO.class.getDeclaredFields();
+            Field[] fields = MCPServerDTO.class.getDeclaredFields();
             ObjectMapper mapper = new ObjectMapper();
             String newApiDtoJsonString = mapper.writeValueAsString(apidto);
             JSONParser parser = new JSONParser();
