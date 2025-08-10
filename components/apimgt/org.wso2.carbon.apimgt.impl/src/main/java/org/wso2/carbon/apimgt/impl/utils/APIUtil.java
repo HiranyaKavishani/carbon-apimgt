@@ -5769,7 +5769,7 @@ public final class APIUtil {
         }
     }
 
-    private static InetAddress getLocalAddress() {
+    public static InetAddress getLocalAddress() {
 
         Enumeration<NetworkInterface> ifaces = null;
         try {
